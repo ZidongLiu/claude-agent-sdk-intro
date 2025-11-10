@@ -1,0 +1,23 @@
+{
+  "name": "fullstack-todo-app",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"yarn server\" \"yarn client\"",
+    "server": "yarn workspace backend dev",
+    "client": "yarn workspace frontend dev",
+    "agents": "cd agents && tsx src/orchestrator.ts",
+    "build": "yarn workspaces run build",
+    "start": "yarn workspace backend start"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^0.68.0",
+    "@playwright/test": "^1.56.1",
+    "concurrently": "^9.2.1",
+    "dotenv": "^17.2.3",
+    "typescript": "^5.3.3"
+  }
+}

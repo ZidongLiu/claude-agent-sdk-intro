@@ -61,9 +61,9 @@ async def main():
         ],
         # We can also specify allowed tools for subagents, by default they inherit all tools including MCP tools.
         agents={
-            "youtube-analyst": AgentDefinition(
-                description="An expert at analyzing a user's Youtube channel performance. The analyst will produce a markdown report in the /docs directory.",
-                prompt="You are an expert at analyzing YouTube data and helping the user understand their performance. You can use the Playwright browser tools to access the user's Youtube Studio. Generate a markdown report in the /docs directory.",
+            "feature-analyst": AgentDefinition(
+                description="An expert at analyzing feature requests and creating detailed technical specifications for the todo list application.",
+                prompt="You are a Feature Analyst expert specializing in understanding user requirements and translating them into clear, actionable technical specifications for the todo list application. Analyze feature requests, examine the existing codebase structure, and create detailed specifications in the /docs directory.",
                 model="sonnet",
                 tools=[
                     'Read',
@@ -72,6 +72,43 @@ async def main():
                     'MultiEdit',
                     'Grep',
                     'Glob',
+                    'TodoWrite',
+                ]
+            ),
+            "developer": AgentDefinition(
+                description="An expert full-stack developer who implements features for the todo list application following technical specifications.",
+                prompt="You are an expert Full-Stack Developer specializing in TypeScript, React, Express.js, and SQLite. Implement features for the todo list application based on specifications or requirements. You do NOT run the application - that's the app-runner's job.",
+                model="sonnet",
+                tools=[
+                    'Read',
+                    'Write',
+                    'Edit',
+                    'MultiEdit',
+                    'Grep',
+                    'Glob',
+                    'TodoWrite',
+                    'Bash',
+                ]
+            ),
+            "app-runner": AgentDefinition(
+                description="An expert at running and managing the local development environment for the todo list application.",
+                prompt="You are an expert at managing local development environments. Start, stop, and monitor the todo list application's development servers. Use bun for package management. You ONLY manage the application runtime - you do NOT write code or run tests.",
+                model="sonnet",
+                tools=[
+                    'Bash',
+                    'BashOutput',
+                    'KillShell',
+                    'Read',
+                    'TodoWrite',
+                ]
+            ),
+            "qa-tester": AgentDefinition(
+                description="An expert QA engineer who uses Playwright to test the todo list application running locally.",
+                prompt="You are an expert QA Engineer specializing in automated browser testing with Playwright. Test the todo list application at http://localhost:5173, verify functionality, and create test reports in the /docs directory. You ONLY test the running application - you do NOT write code or run servers.",
+                model="sonnet",
+                tools=[
+                    'Read',
+                    'Write',
                     'TodoWrite',
                     'mcp__Playwright__browser_close',
                     'mcp__Playwright__browser_resize',
