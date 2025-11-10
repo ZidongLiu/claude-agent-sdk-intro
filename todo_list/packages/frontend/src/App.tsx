@@ -1,12 +1,26 @@
-import { useState, useEffect } from 'react';
-import { Todo } from './types';
+import { useState, useEffect, useMemo } from 'react';
+import { Todo, FilterState, TodoStatus, SortOrder } from './types';
 import { api } from './api';
+import { FilterBar } from './components/FilterBar';
+import { filterTodos } from './utils/filterUtils';
+import { useDebounce } from './hooks/useDebounce';
+import { useLocalStorage } from './hooks/useLocalStorage';
 
 function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodoTitle, setNewTodoTitle] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Filter state with localStorage persistence
+  const [filters, setFilters] = useLocalStorage<FilterState>('todoFilters', {
+    status: 'all',
+    searchQuery: '',
+    sortOrder: 'newest',
+  });
+
+  // Debounced search query for performance
+  const debouncedSearchQuery = useDebounce(filters.searchQuery, 300);
 
   useEffect(() => {
     loadTodos();
@@ -65,8 +79,42 @@ function App() {
     }
   };
 
-  const activeTodos = todos.filter((t) => !t.completed);
-  const completedTodos = todos.filter((t) => t.completed);
+  // Apply filters to todos with memoization for performance
+  const filteredTodos = useMemo(() => {
+    return filterTodos(todos, {
+      ...filters,
+      searchQuery: debouncedSearchQuery,
+    });
+  }, [todos, filters.status, debouncedSearchQuery, filters.sortOrder]);
+
+  // Calculate todo counts for filter display
+  const todoCount = {
+    all: todos.length,
+    active: todos.filter(t => !t.completed).length,
+    completed: todos.filter(t => t.completed).length,
+    filtered: filteredTodos.length,
+  };
+
+  // Filter handlers
+  const handleStatusChange = (status: TodoStatus) => {
+    setFilters({ ...filters, status });
+  };
+
+  const handleSearchChange = (searchQuery: string) => {
+    setFilters({ ...filters, searchQuery });
+  };
+
+  const handleSortChange = (sortOrder: SortOrder) => {
+    setFilters({ ...filters, sortOrder });
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      status: 'all',
+      searchQuery: '',
+      sortOrder: 'newest',
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4">
@@ -80,6 +128,15 @@ function App() {
             {error}
           </div>
         )}
+
+        <FilterBar
+          filters={filters}
+          onStatusChange={handleStatusChange}
+          onSearchChange={handleSearchChange}
+          onSortChange={handleSortChange}
+          onClearFilters={handleClearFilters}
+          todoCount={todoCount}
+        />
 
         <form onSubmit={handleCreateTodo} className="mb-8">
           <div className="flex gap-2">
@@ -101,50 +158,23 @@ function App() {
 
         {loading ? (
           <div className="text-center text-gray-600">Loading...</div>
+        ) : filteredTodos.length === 0 ? (
+          <div className="text-center text-gray-500 py-12">
+            {todos.length === 0
+              ? 'No todos yet. Add one to get started!'
+              : 'No todos match your filters.'}
+          </div>
         ) : (
-          <>
-            {activeTodos.length > 0 && (
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-700 mb-3">
-                  Active ({activeTodos.length})
-                </h2>
-                <div className="space-y-2">
-                  {activeTodos.map((todo) => (
-                    <TodoItem
-                      key={todo.id}
-                      todo={todo}
-                      onToggle={handleToggleTodo}
-                      onDelete={handleDeleteTodo}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {completedTodos.length > 0 && (
-              <div>
-                <h2 className="text-xl font-semibold text-gray-700 mb-3">
-                  Completed ({completedTodos.length})
-                </h2>
-                <div className="space-y-2">
-                  {completedTodos.map((todo) => (
-                    <TodoItem
-                      key={todo.id}
-                      todo={todo}
-                      onToggle={handleToggleTodo}
-                      onDelete={handleDeleteTodo}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {todos.length === 0 && (
-              <div className="text-center text-gray-500 py-12">
-                No todos yet. Add one to get started!
-              </div>
-            )}
-          </>
+          <div className="space-y-2">
+            {filteredTodos.map((todo) => (
+              <TodoItem
+                key={todo.id}
+                todo={todo}
+                onToggle={handleToggleTodo}
+                onDelete={handleDeleteTodo}
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>
