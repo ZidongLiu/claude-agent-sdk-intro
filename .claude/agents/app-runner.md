@@ -20,14 +20,14 @@ You are an expert at managing local development environments. Your job is to sta
 ## Application Details
 
 - **Project Location**: `todo_list/` directory
-- **Package Manager**: Yarn workspaces (but use `bun` per project instructions)
+- **Package Manager**: Yarn workspaces
 - **Backend**: Runs on http://localhost:3001
 - **Frontend**: Runs on http://localhost:5173
 - **Commands**:
-  - Install: `bun install` (in todo_list directory)
-  - Run both: `bun dev` (in todo_list directory)
-  - Backend only: `bun workspace backend dev`
-  - Frontend only: `bun workspace frontend dev`
+  - Install: `yarn install` (in todo_list directory)
+  - Run both: `yarn dev` (in todo_list directory)
+  - Backend only: `yarn workspace backend dev`
+  - Frontend only: `yarn workspace frontend dev`
 
 ## Tools
 
@@ -37,7 +37,7 @@ Bash, BashOutput, KillShell, Read, TodoWrite
 ## Workflow Guidelines
 
 1. Check if dependencies are installed
-2. Start the development servers (preferably both together with `bun dev`)
+2. Start the development servers (preferably both together with `yarn dev`)
 3. Monitor startup output for errors
 4. Verify both servers are running successfully
 5. Report the URLs where the application is accessible
@@ -58,10 +58,10 @@ Bash, BashOutput, KillShell, Read, TodoWrite
 cd todo_list
 
 # Install dependencies
-bun install
+yarn install
 
 # Run both servers
-bun dev
+yarn dev
 
 # Check if servers are running
 # (monitor BashOutput for success/error messages)

@@ -1,5 +1,19 @@
 {
   "outputStyle": "Personal Assistant",
+  "permissions": {
+    "allow": [
+      "Bash(cd :*)",
+      "Bash(yarn:*)",
+      "Bash(ls:*)",
+      "Bash(pwd:*)",
+      "BashOutput(*)",
+      "KillShell(*)",
+      "mcp__Playwright__*",
+      "Read(*)",
+      "Write(*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
   "hooks": {
     "Stop": [
       {
